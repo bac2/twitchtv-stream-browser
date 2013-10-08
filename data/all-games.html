@@ -1,0 +1,247 @@
+<html>
+<head>
+	<meta charset="UTF-8">
+	
+    <style type="text/css">
+    	body {
+		    font-family: verdana;
+			font-size: 12px;
+			-moz-user-select: none;
+			background-color: #F9F0F6; %#F0F0E0;%#F4EAFA; 
+
+		}
+		#logo {
+			height: 26px;
+			width: 26px;
+			display:inline;
+			margin-right: 5px;
+		}
+		#title {
+			font-size: 18px;
+			display:inline;
+			width: 300px;
+			vertical-align: top;
+			margin-top: 10px;
+		}
+		.wrapper {
+			position: relative;
+			width: 900px;
+			display: inline-block;
+			left: 0;
+			height: auto;
+		}
+		#games {
+			float: left;
+			position: relative;
+			left: 0;
+		}
+		#streams {
+			position: relative;
+			float: left;
+			padding-left: 5px;
+			left: 0;
+		}
+		#all, #favStreams{
+
+			overflow: hidden;
+			display: inline-block;
+			width: 350px;
+		}
+        #all ul, #favStreams ul
+        {
+			list-style-type: none;
+			width: 350px;
+            margin:0;
+            padding:0;
+        } 
+        .content span {
+            %overflow: hidden;
+        }
+		
+        .content li
+        {
+			margin-bottom: 1px;
+        }
+		.status, .display_name
+		{
+			display: inline-block;
+			width: 250px;
+			position:relative;
+			vertical-align: middle;
+			margin-left: 10px;
+		}
+        .content a:link,a:visited 
+        {
+            color: #000;
+            text-decoration: none;
+			background-color: #E9D5F5;
+            display:block;
+            width: 100%;
+			height: auto;
+        }
+
+        .content a:hover, a:active
+        {
+			background-color: #DDC0F0;
+        }
+        .viewers 
+        {	
+			vertical-align: middle;
+        }
+		#favTitle, #allTitle, #titleDiv {
+			cursor: default;
+		}
+		#allTitle {
+			font-size: 18px;
+		}
+		
+		#nav a {
+			color: #000;
+			text-decoration: none;	
+		}
+		
+		#nav {
+			
+			list-style: none;
+			padding: 0;
+			margin: 0;
+			position: relative;
+			z-index: 1;
+		}
+		#nav li {
+			display: inline;
+			border: solid;
+			border-width: 1px 1px 0 1px;
+			margin: 0 0.5em 0 0;
+		}
+		
+		#nav li a {
+			padding: 0 1em;
+		}
+		
+		.content {
+			border: 1px solid;
+			padding: 5px;
+		}
+		
+		.tab.active {
+			padding-bottom: 1px;
+			background: #F9F0F6;%#F0F0E0;
+			z-index: 999;
+		}
+		
+		#all img, #favStreams img {
+			height: 36px;
+			width: auto;
+			vertical-align: middle;
+		}
+
+		.search, .reload, .back {
+			font-size: 20px;
+			cursor: pointer;
+		}
+		.searchGame, .reloadGame {
+			font-size: 20px;
+			cursor: pointer;
+		}
+		.wrapper input {
+			font-size: 20px;
+			width: 275px;
+			margin-right: 5px;
+		}
+		#gameSearchText {
+			width: 300px;
+			margin-right: 5px;
+		}
+		
+		.setting {
+			display: inline-block;
+			margin-top: 10px;
+		}
+		
+		#settings input {
+			margin-top: 5px;
+			display: inline-block;
+		}
+		
+		#settings a {
+			padding-left: 20px;
+			width: 150px;
+			height: 36px;
+		}
+		
+		#settings #clearText {
+			margin-left: 20px;
+			display: table-cell;
+			font-size: 16px;
+			%height: auto;
+			vertical-align: middle;
+			text-align: center;
+			line-height: 36px; 
+			position: relative;
+		}
+		
+		#games-list img {
+			width: 60px;
+			height: 36px;
+		}
+
+    </style>
+</head>
+<body>
+
+<div id="titleDiv">
+	<img id="logo" />
+	<span id="title">Twitch.tv Stream Browser</span>
+</div>
+<div id="tab-container" class="tab-container">
+<ul class="etabs" id="nav">
+	<li class="tab"><a id="allLink" href="#all"><span>All</span></a></li>
+	<li class="tab"><a id="favsLink" href="#favs"><span>Favourites</span></a></li>
+	<li class="tab"><a id="settingsLink" href="#settings"><span>Settings</span></a></li>
+</ul>
+<div id="all" class="content">
+	<div class="wrapper">
+		<div id="games">
+			<input id="gameSearchText" type="text" size="20" /><span class="search" id="gameSearch">🔎</span><span class="reload" id="gameReload">🔃</span><br/>
+			<span id='allTitle'>Currently Streaming Games</span>
+			<ul id="games-list"></ul>
+			<div id="next-link-games"><a href="">More</a></div>
+		</div>
+		<div id="streams">
+			<span class="back">🔙</span>
+			<input id="searchText" type="text" size="20" /><span class="search" id="streamSearch">🔎</span><span class="reload" id="streamReload">🔃</span><br/>
+			<span id='allTitle'><span id="gameName"></span></span><br/>
+			<span id="favouritesTitle">Favourites</span><br/>
+			<ul id="favouritesList"></ul>
+			<span id="non-favouritesTitle">Everything else</span><br/>
+			<ul id="streams-list"></ul>
+			<div id="next-link-streams"><a href="">More</a></div>
+		</div>
+	</div>
+</div>
+<div id="favs" class="content">
+		<div id="favStreams">
+		<span id='allTitle'>Current favourite streamers</span>
+			<ul id="favStreamersList"></ul>
+		</div>
+</div>
+<div id="settings" class="content">
+		<span id="allTitle">Settings</span> <br />
+		<span class="setting">
+			Enable desktop notifications?
+			<input type="checkbox" id="notifSetting" />
+		</span> <br />
+		<span class="setting">
+			Open streams in popout mode?
+			<input type="checkbox" id="popoutSetting" />
+		</span> <br />
+		<span class="setting">
+			Show stream description instead of streamer name? 
+			<input state="checked" type="checkbox" id="descripSetting" />
+		</span> <br />
+		<a id="clearFavs" class="setting" href="#"><span id="clearText">Clear favourites</span></a>
+</div>
+
+</body>
+</html>

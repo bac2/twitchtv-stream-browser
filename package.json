@@ -1,0 +1,14 @@
+{
+  "license": "MPL 2.0",
+  "description": "An addon to list all streams and games on Twitch.tv",
+  "contributors": [], 
+  "author": "bac2g", 
+  "url": "", 
+  "dependencies": ["api-utils", "addon-kit"], 
+  "version": "0.99", 
+  "lib": "lib", 
+  "fullName": "Twitch.tv Stream Browser", 
+  "main": "main", 
+  "id": "jid0-5q424C3HVeyE2T4d9bkO7CpXNjU@jetpack", 
+  "name": "twitchtv-stream-browser"
+}
