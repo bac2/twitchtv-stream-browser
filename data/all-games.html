@@ -1,19 +1,19 @@
 <html>
 <head>
 	<meta charset="UTF-8">
-	
+	<link type="text/css" href="js/jquery.contextMenu.css" rel="Stylesheet" />    
     <style type="text/css">
+
     	body {
 		    font-family: verdana;
 			font-size: 12px;
+			background-color: #F9F0F6;
 			-moz-user-select: none;
-			background-color: #F9F0F6; %#F0F0E0;%#F4EAFA; 
-
 		}
 		#logo {
 			height: 26px;
 			width: 26px;
-			display:inline;
+			display: inline;
 			margin-right: 5px;
 		}
 		#title {
@@ -41,7 +41,7 @@
 			padding-left: 5px;
 			left: 0;
 		}
-		#all, #favStreams{
+		#all, #favStreams {
 
 			overflow: hidden;
 			display: inline-block;
@@ -54,10 +54,7 @@
             margin:0;
             padding:0;
         } 
-        .content span {
-            %overflow: hidden;
-        }
-		
+
         .content li
         {
 			margin-bottom: 1px;
@@ -87,12 +84,16 @@
         .viewers 
         {	
 			vertical-align: middle;
+			display: inline-block;
         }
-		#favTitle, #allTitle, #titleDiv {
+		#favTitle, .allTitle, #titleDiv {
 			cursor: default;
 		}
-		#allTitle {
+		.allTitle {
 			font-size: 18px;
+		}
+		.subTitle {
+			font-size: 14px;
 		}
 		
 		#nav a {
@@ -101,7 +102,6 @@
 		}
 		
 		#nav {
-			
 			list-style: none;
 			padding: 0;
 			margin: 0;
@@ -126,8 +126,8 @@
 		
 		.tab.active {
 			padding-bottom: 1px;
-			background: #F9F0F6;%#F0F0E0;
-			z-index: 999;
+			background-color: #F9F0F6;
+			z-index: 9;
 		}
 		
 		#all img, #favStreams img {
@@ -154,6 +154,11 @@
 			margin-right: 5px;
 		}
 		
+		#favSearchText {
+			width: 320px;
+			margin-right: 5px;
+			font-size: 20px;
+		}
 		.setting {
 			display: inline-block;
 			margin-top: 10px;
@@ -174,7 +179,6 @@
 			margin-left: 20px;
 			display: table-cell;
 			font-size: 16px;
-			%height: auto;
 			vertical-align: middle;
 			text-align: center;
 			line-height: 36px; 
@@ -189,7 +193,6 @@
     </style>
 </head>
 <body>
-
 <div id="titleDiv">
 	<img id="logo" />
 	<span id="title">Twitch.tv Stream Browser</span>
@@ -204,14 +207,14 @@
 	<div class="wrapper">
 		<div id="games">
 			<input id="gameSearchText" type="text" size="20" /><span class="search" id="gameSearch">🔎</span><span class="reload" id="gameReload">🔃</span><br/>
-			<span id='allTitle'>Currently Streaming Games</span>
+			<span class="allTitle">Currently Streaming Games</span>
 			<ul id="games-list"></ul>
 			<div id="next-link-games"><a href="">More</a></div>
 		</div>
 		<div id="streams">
 			<span class="back">🔙</span>
 			<input id="searchText" type="text" size="20" /><span class="search" id="streamSearch">🔎</span><span class="reload" id="streamReload">🔃</span><br/>
-			<span id='allTitle'><span id="gameName"></span></span><br/>
+			<span class="allTitle"><span id="gameName"></span></span><br/>
 			<span id="favouritesTitle">Favourites</span><br/>
 			<ul id="favouritesList"></ul>
 			<span id="non-favouritesTitle">Everything else</span><br/>
@@ -222,12 +225,16 @@
 </div>
 <div id="favs" class="content">
 		<div id="favStreams">
-		<span id='allTitle'>Current favourite streamers</span>
-			<ul id="favStreamersList"></ul>
+		Add streamer by Twitch name: <span id="favSearchStatus"></span><br /> 
+		<input id="favSearchText" type="text" size="20" /><span class="search" id="channelSearch">🔎</span>
+		<span class="allTitle" id='onlineTitle'>Online favourites</span>
+		<ul id="favStreamersList"></ul>
+		<span class="allTitle" id='offlineTitle'>Offline favourites</span>
+		<ul id="offlineFavsList"></ul>
 		</div>
 </div>
 <div id="settings" class="content">
-		<span id="allTitle">Settings</span> <br />
+		<span class="allTitle">Settings</span> <br />
 		<span class="setting">
 			Enable desktop notifications?
 			<input type="checkbox" id="notifSetting" />
@@ -238,7 +245,15 @@
 		</span> <br />
 		<span class="setting">
 			Show stream description instead of streamer name? 
-			<input state="checked" type="checkbox" id="descripSetting" />
+			<input type="checkbox" id="descripSetting" />
+		</span> <br />
+		<span class="setting">
+			Show streamers flagged for abuse?
+			<input type="checkbox" id="flaggedSetting" />
+		</span> <br />
+		<span class="setting">
+			Group favourites by game?
+			<input type="checkbox" id="groupingSetting" />
 		</span> <br />
 		<a id="clearFavs" class="setting" href="#"><span id="clearText">Clear favourites</span></a>
 </div>

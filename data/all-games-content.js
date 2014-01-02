@@ -40,7 +40,7 @@ function resetGamesList() {
 			$("#streams").css("height"),
 		left: parseInt($("#games").css('left'),10) == 0 ?
 			$("#games").outerWidth()+5 :
-			0
+			"0px"
 	}, 1000);
 }
 self.port.on("resetGames", resetGamesList);
@@ -62,7 +62,8 @@ function setNextGamesURL(offset) {
 self.port.on("nextGamesURL", setNextGamesURL);
 
 function addStreamToList(stream, favourites) {
-	var popout_url = "";
+	var popout_url = "",
+		gameName = "";
 	if( settings.popout == true) {
 		popout_url = stream.channel.url + "/popout";
 	} else {
@@ -78,8 +79,26 @@ function addStreamToList(stream, favourites) {
 							]
 						], document, {});
 	if(favourites) { //On the favourites tab
-		insertToList(html, $("#favStreamersList"));
+		
+		console.log("Game: "+ gameName + " grouped: " + settings.grouped);
+		if (settings.grouped) {
+			gameName = stream.channel.game;
+			gameName = gameName.replace(/([^A-Za-z0-9-_])/g, "_");
+			if ($("#game-"+gameName).length > 0) {
+				insertToList(html, $("#game-"+gameName));
+			} else {
+				var domList = jsonToDOM(['ul', {id: "game-"+gameName}], document, {});
+				$("#favStreamersList").append(domList);
+				$("#game-"+gameName).prepend( jsonToDOM( ['span', {class:"allTitle"}, stream.channel.game], document, {}));
+				insertToList(html, $("#game-"+gameName));
+				console.log("created " + $("#favStreamersList").html());
+			}
+		} else {
+			insertToList(html, $("#favStreamersList"));
+			$("#onlineTitle").show();
+		}
 		$("#favStreamersList").show();
+
 	} else if (favList[stream.channel.name] == true || favList[stream.channel.name] == false) {
 		$("#favouritesList").append(html);
 	} else {
@@ -100,26 +119,62 @@ function addStreamToList(stream, favourites) {
 	
 	$(html).find("img").click(changeFavouriteState);
 	
-	//Resize for the new element
-	if( !favourites ) {
-		$(".wrapper").animate({
-			height: $("#streams").css("height")
-		}, 10);
-	}
 }
 self.port.on("addStream", addStreamToList);
+
+function addOfflineFavToList(stream) {
+	var html = jsonToDOM(["li", {class: "stream-link"}, 
+							["a", {class:"link", href: "#"},
+								["img", {src: stream.logo, class:"gameLogo"}],
+								["span", {class:"status"}, stream.name],
+								["span", {class:"display_name"}, stream.name],
+								["span", {class:"name", style:"display: none;"}, stream.name],
+								["span", {class:"viewers"}, ""]
+							]
+						], document, {});
+	$("#offlineTitle").show();
+	if( settings.status == true) {
+		$(html).find(".display_name").hide();
+		$(html).find(".status").show();
+	} else {
+		$(html).find(".display_name").show();
+		$(html).find(".status").hide();
+	}
+	$(html).find("img").click(changeFavouriteState);
+	insertToList(html, $("#offlineFavsList"));
+}
+
+self.port.on("offlineFav", addOfflineFavToList);
+self.port.on("streams-complete", function() {
+	//At the end of the streams we know the size
+	$(".wrapper").animate({
+		height: $("#streams").css("height")
+	}, 10);
+});
 
 function resetStreamsList(gameName) {
 	$("#streams-list").empty();
 	$("#favouritesList").empty();
 	$("#gameName").html(gameName);
 	
-	$(".wrapper").animate({
-		height: $("#streams").css("height"),
-		left: parseInt($("#games").css('left'),10) == 0 ?
-			-$("#games").outerWidth()-5 :
-			0
-    }, 1000);
+	if( $(".wrapper").css("left") != "0px" ) {
+		//Do nothing. We're already on streams side
+	} else {
+		$(".wrapper").animate({
+			left: parseInt($("#games").css('left'),10) == 0 ?
+				-$("#games").outerWidth()-5 :
+				"0px"
+		}, {
+			duration: 1000,
+			queue: false
+		});
+		$("html, body").animate({
+			scrollTop: $("html, body").offset().top
+		}, {
+			queue: false,
+			duration: 1000
+		});
+	}
 
 }
 self.port.on("resetStreams", resetStreamsList);
@@ -131,6 +186,11 @@ function nextStreamsClick(event) {
 	var offset = event.target.getAttribute("next-offset");
 	var gameName = $("#gameName").html();
 	self.port.emit("getMoreStreams", offset, gameName);
+	setTimeout(function() {
+		$(".wrapper").animate({
+			height: $("#streams").css("height")
+		}, 10);
+	}, 600);
 	event.stopPropagation();
 	event.preventDefault();
 }
@@ -143,6 +203,9 @@ self.port.on("nextStreamsURL", setNextStreamsURL);
 
 function resetFavsList() {
 	$("#favStreamersList").empty();
+	$("#offlineFavsList").empty();
+	$("#onlineTitle").hide();
+	$("#offlineTitle").hide();
 }
 self.port.on("resetFavs", resetFavsList);
 
@@ -209,12 +272,43 @@ self.port.on("settings", function(incSettings) {
 	if(settings.status == true) {
 		$("#descripSetting").prop('checked', true);
 	}
+	if(settings.showFlagged == true) {
+		$("#flaggedSetting").prop('checked', true);
+	}
+	if(settings.grouped == true) {
+		$("#groupingSetting").prop('checked', true);
+	}
 });
 
 self.port.on("logo", function(logo) {
 	document.getElementById("logo").src = logo;
 });
 
+self.port.on("show", function() {
+	if( parseInt($(".wrapper").css("left"),10) != 0 ) {
+		var game = $("#gameName").html();
+		self.port.emit("gameClick", game);
+	} else {
+		self.port.emit("reloadGames");
+	}
+});
+
+self.port.on("foundChannel", function(found, name) {
+	if (found) {
+		if (favList[name] === true || favList[name] === false) {
+			$("#favSearchStatus").text("Already a favourite");
+		} else {
+			self.port.emit("fav", name);
+			$("#favSearchStatus").text("Added " + name);
+			self.port.emit("getFavourites");
+		}
+	} else {
+		$("#favSearchStatus").text(name + " not found");
+	}
+	$("#favSearchStatus").show();
+	$("#favSearchStatus").fadeOut(3000);
+	$("#favSearchText").val('');
+});
 
 $("#next-link-games").click(nextGamesClick);
 $("#next-link-streams").click(nextStreamsClick);
@@ -223,7 +317,7 @@ $('#tab-container').easytabs({animate: false});
 $(".back").click(function(event) {
 	$(".wrapper").animate({
 	  height: $("#games").css("height"),
-	  left: 0
+	  left: "0px"
 	}, 1000);
 	event.preventDefault();
 	event.stopPropagation();
@@ -233,10 +327,15 @@ $("#favsLink").click(function(event) {
 	self.port.emit("getFavourites");
 });
 $("#allLink").click(function() {
-	if( $("#games").css("left") != "0" ) {
-		$(".wrapper").css("height", $("#streams").css("height"));
+	//Ensure we get the right size, and it is done in the animation queue
+	if( $(".wrapper").css("left") != "0px" ) {
+		$(".wrapper").animate({
+			height: $("#streams").css("height")
+		}, 1);
 	} else {
-		$(".wrapper").css("height", $("#games").css("height"));
+		$(".wrapper").animate({
+			height: $("#games").css("height")
+		}, 1);
 	}
 });
 
@@ -249,6 +348,9 @@ $("#streamReload").click(function(event) {
 	$("#searchText").val("");
 	var game = $("#gameName").html();
 	self.port.emit("gameClick", game);
+	$(".wrapper").animate({
+		height: $("#streams").css("height")
+	}, 10);
 });
 
 $("#searchText").bind("keypress", function(event) {
@@ -264,6 +366,14 @@ $("#gameSearchText").bind("keypress", function(event) {
 	if (key==13) {
 		var text = $("#gameSearchText").val();
 		self.port.emit("searchGames", text);
+	}
+});
+
+$("#favSearchText").bind("keypress", function(event) {
+	var key=event.keyCode || event.which;
+	if (key==13) {
+		var text = $("#favSearchText").val();
+		self.port.emit("findChannel", text);
 	}
 });
 
@@ -303,12 +413,69 @@ $("#descripSetting").click( function(event) {
 	}
 });
 
+$("#flaggedSetting").click( function(event) {
+	if ( $(this).is (':checked')) {
+		self.port.emit("flaggedSetting", true);
+	} else {
+		self.port.emit("flaggedSetting", false);
+	}
+});
+
+$("#groupingSetting").click( function(event) {
+	if ( $(this).is (':checked')) {
+		self.port.emit("groupingSetting", true);
+	} else {
+		self.port.emit("groupingSetting", false);
+	}
+});
+
 $("#clearFavs").click(function() {
 	if( confirm("Are you sure you want to delete your favourites?") ) {
 		favList = {};
 		self.port.emit("clearFavList");
 	}
 });
+
+$("#channelSearch").click(function() {
+	var text = $("#favSearchText").val();
+	self.port.emit("findChannel", text);
+});
+
+
+$(function(){
+    $.contextMenu({
+        selector: '#streams-list li', 
+        callback: function(key, options) {
+			var name = $(this).find(".name").text();
+            if (key === "chat") {
+				self.port.emit("popout_chat", name);
+			} else if (key === "fav") {
+				$(this).find("img").click();
+			}
+        },
+        items: {
+            "chat": {name: "Open popout chat"},
+			"fav": {name: "Add to favourites"}
+        }
+    }),
+	$.contextMenu({
+        selector: '#favouritesList, #favStreamersList li', 
+        callback: function(key, options) {
+			var name = $(this).find(".name").text();
+            if (key === "chat") {
+				self.port.emit("popout_chat", name);
+			} else if (key === "unfav") {
+				$(this).find("img").click();
+			}
+        },
+        items: {
+            "chat": {name: "Open popout chat"},
+			"unfav": {name: "Remove from favourites"}
+        }
+    });
+});
+
+
 
 
 //Convert JSON DOM to real DOM: https://developer.mozilla.org/en-US/docs/XUL/School_tutorial/DOM_Building_and_HTML_Insertion?redirectlocale=en-US&redirectslug=XUL_School%2FDOM_Building_and_HTML_Insertion
